@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { isAuthenticated } from "@/lib/auth";
+import NotificationBell from "@/components/NotificationBell";
 
 export default function Header() {
   const pathname = usePathname();
@@ -63,6 +64,7 @@ export default function Header() {
               >
                 글쓰기
               </Link>
+              <NotificationBell />
               <button
                 onClick={logout}
                 disabled={isLoading}
