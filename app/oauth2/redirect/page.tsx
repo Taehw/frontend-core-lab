@@ -11,7 +11,7 @@ function OAuth2RedirectContent() {
   );
 
   useEffect(() => {
-    const token = searchParams.get("token");
+    const token = searchParams.get("accessToken");
     const refreshToken = searchParams.get("refreshToken");
 
     if (token && refreshToken) {
