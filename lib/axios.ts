@@ -5,7 +5,7 @@
  */
 
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
-import { getAccessToken, getRefreshToken, setAccessToken, setTokens, clearTokens } from "./auth";
+import { getAccessToken, getRefreshToken, setAccessToken, clearTokens } from "./auth";
 import type { RefreshResponse } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -19,7 +19,7 @@ export const apiClient = axios.create({
 
 // 원본 요청 저장 (401 재시도용)
 let failedQueue: Array<{
-  resolve: (value?: unknown) => void;
+  resolve: (value?: string | undefined) => void;
   reject: (reason?: unknown) => void;
 }> = [];
 let isRefreshing = false;
@@ -29,7 +29,7 @@ function processQueue(error: Error | null, newAccessToken: string | null = null)
     if (error) {
       prom.reject(error);
     } else {
-      prom.resolve(newAccessToken);
+      prom.resolve(newAccessToken ?? undefined);
     }
   });
   failedQueue = [];
@@ -62,9 +62,9 @@ apiClient.interceptors.response.use(
 
       if (isRefreshing) {
         // 이미 refresh 진행 중이면 대기 후 새 토큰으로 재시도
-        return new Promise((resolve, reject) => {
+        return new Promise<string | undefined>((resolve, reject) => {
           failedQueue.push({ resolve, reject });
-        }).then((token: string | undefined) => {
+        }).then((token) => {
           if (token) {
             originalRequest.headers.Authorization = `Bearer ${token}`;
           }
