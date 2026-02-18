@@ -40,3 +40,21 @@ export function clearTokens(): void {
 export function isAuthenticated(): boolean {
   return !!getAccessToken();
 }
+
+/**
+ * JWT payload에서 username 추출 (작성자 판별용)
+ * 로컬 로그인: username, OAuth: email
+ */
+export function getUsernameFromToken(): string | null {
+  const token = getAccessToken();
+  if (!token || !isClient()) return null;
+  try {
+    const payload = token.split(".")[1];
+    if (!payload) return null;
+    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const decoded = JSON.parse(atob(base64));
+    return decoded.username ?? null;
+  } catch {
+    return null;
+  }
+}

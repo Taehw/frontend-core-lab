@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { apiClient } from "@/lib/axios";
-import { isAuthenticated } from "@/lib/auth";
-import type { PostResponse } from "@/lib/types";
+import { isAuthenticated, getUsernameFromToken } from "@/lib/auth";
+import PostForm from "@/components/PostForm";
+import type { PostResponse, UpdatePostRequest } from "@/lib/types";
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleString("ko-KR", {
@@ -26,6 +27,14 @@ export default function PostDetailPage() {
   const [post, setPost] = useState<PostResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const currentUsername = getUsernameFromToken();
+  const isAuthor =
+    !!post && !!currentUsername && post.authorName === currentUsername;
 
   useEffect(() => {
     setMounted(true);
@@ -50,6 +59,8 @@ export default function PostDetailPage() {
       try {
         const { data } = await apiClient.get<PostResponse>(`/posts/${postId}`);
         setPost(data);
+        setEditTitle(data.title);
+        setEditContent(data.content);
       } catch (err: unknown) {
         const message =
           (err as { response?: { data?: { error?: string } } })?.response?.data
@@ -63,6 +74,52 @@ export default function PostDetailPage() {
     fetchPost();
   }, [auth, postId]);
 
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!postId) return;
+    setError(null);
+    setIsSubmitting(true);
+    try {
+      const payload: UpdatePostRequest = {
+        title: editTitle,
+        content: editContent,
+      };
+      const { data } = await apiClient.put<PostResponse>(
+        `/posts/${postId}`,
+        payload
+      );
+      setPost(data);
+      setIsEditing(false);
+      router.refresh();
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { error?: string } } })?.response?.data
+          ?.error || "게시글 수정에 실패했습니다";
+      setError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!postId) return;
+    if (!confirm("정말 삭제하시겠습니까?")) return;
+    setError(null);
+    setIsSubmitting(true);
+    try {
+      await apiClient.delete(`/posts/${postId}`);
+      router.push("/posts");
+      router.refresh();
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { error?: string } } })?.response?.data
+          ?.error || "게시글 삭제에 실패했습니다";
+      setError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (!mounted || !auth) {
     return (
       <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center bg-zinc-50/80">
@@ -74,7 +131,7 @@ export default function PostDetailPage() {
   return (
     <div className="min-h-[calc(100vh-3.5rem)] bg-zinc-50/80">
       <div className="mx-auto max-w-3xl px-4 py-8">
-        <div className="mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <Link
             href="/posts"
             className="text-sm font-medium text-zinc-600 hover:text-zinc-900"
@@ -95,11 +152,56 @@ export default function PostDetailPage() {
                 {error}
               </div>
             </div>
+          ) : post && isEditing ? (
+            <div className="p-6">
+              <h2 className="mb-6 text-lg font-semibold text-zinc-900">
+                게시글 수정
+              </h2>
+              <PostForm
+                title={editTitle}
+                content={editContent}
+                onTitleChange={setEditTitle}
+                onContentChange={setEditContent}
+                onSubmit={handleUpdate}
+                isLoading={isSubmitting}
+                submitLabel="수정하기"
+              />
+              <button
+                type="button"
+                onClick={() => setIsEditing(false)}
+                disabled={isSubmitting}
+                className="mt-4 text-sm font-medium text-zinc-600 hover:text-zinc-900 disabled:opacity-50"
+              >
+                취소
+              </button>
+            </div>
           ) : post ? (
             <div className="p-6">
-              <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
-                {post.title}
-              </h1>
+              <div className="flex items-start justify-between gap-4">
+                <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
+                  {post.title}
+                </h1>
+                {isAuthor && (
+                  <div className="flex shrink-0 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsEditing(true)}
+                      disabled={isSubmitting}
+                      className="inline-flex h-9 items-center justify-center rounded-md border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-50 disabled:opacity-50"
+                    >
+                      수정
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDelete}
+                      disabled={isSubmitting}
+                      className="inline-flex h-9 items-center justify-center rounded-md border border-red-200 bg-white px-3 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
+                    >
+                      삭제
+                    </button>
+                  </div>
+                )}
+              </div>
               <div className="mt-3 flex items-center gap-3 text-sm text-zinc-500">
                 <span>{post.authorName}</span>
                 <span>{formatDate(post.createdAt)}</span>
