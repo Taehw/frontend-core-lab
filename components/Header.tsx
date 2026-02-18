@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { isAuthenticated } from "@/lib/auth";
+import { isAuthenticated, isAdmin } from "@/lib/auth";
 import NotificationBell from "@/components/NotificationBell";
 
 export default function Header() {
@@ -17,6 +17,8 @@ export default function Header() {
     setMounted(true);
     setAuthenticated(isAuthenticated());
   }, [pathname]);
+
+  const admin = isAdmin();
 
   const isAuthPage = pathname === "/login" || pathname === "/signup";
   const isOAuthPage = pathname.startsWith("/oauth2");
@@ -64,6 +66,14 @@ export default function Header() {
               >
                 글쓰기
               </Link>
+              {admin && (
+                <Link
+                  href="/admin"
+                  className="inline-flex h-9 items-center justify-center rounded-md px-3 text-sm font-medium text-amber-600 transition-colors hover:bg-amber-50 hover:text-amber-700"
+                >
+                  관리자
+                </Link>
+              )}
               <NotificationBell />
               <button
                 onClick={logout}

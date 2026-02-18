@@ -41,20 +41,38 @@ export function isAuthenticated(): boolean {
   return !!getAccessToken();
 }
 
-/**
- * JWT payload에서 username 추출 (작성자 판별용)
- * 로컬 로그인: username, OAuth: email
- */
-export function getUsernameFromToken(): string | null {
+function decodeTokenPayload(): Record<string, unknown> | null {
   const token = getAccessToken();
   if (!token || !isClient()) return null;
   try {
     const payload = token.split(".")[1];
     if (!payload) return null;
     const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
-    const decoded = JSON.parse(atob(base64));
-    return decoded.username ?? null;
+    return JSON.parse(atob(base64)) as Record<string, unknown>;
   } catch {
     return null;
   }
+}
+
+/**
+ * JWT payload에서 username 추출 (작성자 판별용)
+ * 로컬 로그인: username, OAuth: email
+ */
+export function getUsernameFromToken(): string | null {
+  const decoded = decodeTokenPayload();
+  return (decoded?.username as string) ?? null;
+}
+
+/**
+ * JWT payload에서 role 추출 (RBAC용)
+ */
+export function getRoleFromToken(): "USER" | "ADMIN" | null {
+  const decoded = decodeTokenPayload();
+  const role = decoded?.role as string | undefined;
+  if (role === "ADMIN" || role === "USER") return role;
+  return null;
+}
+
+export function isAdmin(): boolean {
+  return getRoleFromToken() === "ADMIN";
 }
