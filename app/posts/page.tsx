@@ -15,6 +15,7 @@ export default function PostsPage() {
   const [posts, setPosts] = useState<PostListResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [likingPostId, setLikingPostId] = useState<number | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -51,6 +52,21 @@ export default function PostsPage() {
 
     fetchPosts();
   }, [auth]);
+
+  const handleLike = async (postId: number) => {
+    if (likingPostId) return;
+    setLikingPostId(postId);
+    try {
+      await apiClient.post(`/posts/${postId}/like`);
+      const { data } = await apiClient.get<PostListResponse>("/posts");
+      setPosts(data);
+      router.refresh();
+    } catch {
+      // 에러 시 무시
+    } finally {
+      setLikingPostId(null);
+    }
+  };
 
   if (!mounted || !auth) {
     return (
@@ -130,7 +146,12 @@ export default function PostsPage() {
           ) : (
             <div className="divide-y divide-zinc-200">
               {posts.posts.map((post) => (
-                <PostCard key={post.id} post={post} />
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  onLike={handleLike}
+                  isLiking={likingPostId === post.id}
+                />
               ))}
             </div>
           )}

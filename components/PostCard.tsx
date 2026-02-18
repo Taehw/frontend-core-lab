@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { getUsernameFromToken } from "@/lib/auth";
 import type { PostResponse } from "@/lib/types";
 
 function formatDate(dateStr: string): string {
@@ -27,9 +28,25 @@ function formatDate(dateStr: string): string {
 
 interface PostCardProps {
   post: PostResponse;
+  onLike?: (postId: number) => void;
+  isLiking?: boolean;
 }
 
-export default function PostCard({ post }: PostCardProps) {
+export default function PostCard({
+  post,
+  onLike,
+  isLiking = false,
+}: PostCardProps) {
+  const currentUsername = getUsernameFromToken();
+  const isAuthor =
+    !!currentUsername && post.authorName === currentUsername;
+
+  const handleLikeClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isAuthor && onLike) onLike(post.id);
+  };
+
   return (
     <Link
       href={`/posts/${post.id}`}
@@ -46,7 +63,13 @@ export default function PostCard({ post }: PostCardProps) {
             <span>{formatDate(post.createdAt)}</span>
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-1 text-sm text-zinc-500">
+        <button
+          type="button"
+          onClick={handleLikeClick}
+          disabled={isAuthor || isLiking}
+          className="flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 disabled:cursor-default disabled:opacity-50 disabled:hover:bg-transparent"
+          title={isAuthor ? "본인 글" : "좋아요"}
+        >
           <svg
             className="h-4 w-4"
             fill="none"
@@ -61,7 +84,7 @@ export default function PostCard({ post }: PostCardProps) {
             />
           </svg>
           <span>{post.likeCount}</span>
-        </div>
+        </button>
       </div>
     </Link>
   );

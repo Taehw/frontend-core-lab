@@ -31,6 +31,7 @@ export default function PostDetailPage() {
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLiking, setIsLiking] = useState(false);
 
   const currentUsername = getUsernameFromToken();
   const isAuthor =
@@ -120,6 +121,21 @@ export default function PostDetailPage() {
     }
   };
 
+  const handleLike = async () => {
+    if (!postId || isLiking) return;
+    setIsLiking(true);
+    try {
+      await apiClient.post(`/posts/${postId}/like`);
+      const { data } = await apiClient.get<PostResponse>(`/posts/${postId}`);
+      setPost(data);
+      router.refresh();
+    } catch {
+      // 에러 시 무시 (이미 좋아요 했을 수 있음)
+    } finally {
+      setIsLiking(false);
+    }
+  };
+
   if (!mounted || !auth) {
     return (
       <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center bg-zinc-50/80">
@@ -205,7 +221,13 @@ export default function PostDetailPage() {
               <div className="mt-3 flex items-center gap-3 text-sm text-zinc-500">
                 <span>{post.authorName}</span>
                 <span>{formatDate(post.createdAt)}</span>
-                <span className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={handleLike}
+                  disabled={isLiking || isAuthor}
+                  className="flex items-center gap-1 rounded-md px-2 py-1 transition-colors hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent"
+                  title={isAuthor ? "본인 글은 좋아요할 수 없습니다" : "좋아요"}
+                >
                   <svg
                     className="h-4 w-4"
                     fill="none"
@@ -219,8 +241,8 @@ export default function PostDetailPage() {
                       d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                     />
                   </svg>
-                  {post.likeCount}
-                </span>
+                  <span>{post.likeCount}</span>
+                </button>
               </div>
               <div className="mt-6 whitespace-pre-wrap text-zinc-700">
                 {post.content}
