@@ -35,71 +35,87 @@ function LoginForm() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4">
-      <div className="w-full max-w-md rounded-xl border border-zinc-200 bg-white p-8 shadow-sm">
-        <h1 className="mb-6 text-2xl font-bold text-zinc-900">로그인</h1>
-
-        {signupSuccess && (
-          <p className="mb-4 rounded-lg bg-green-50 p-3 text-sm text-green-700">
-            회원가입이 완료되었습니다. 로그인해주세요.
+    <div className="flex min-h-screen items-center justify-center bg-zinc-50/80 px-4 py-12">
+      <div className="w-full max-w-[400px] space-y-6">
+        <div className="space-y-2 text-center">
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
+            로그인
+          </h1>
+          <p className="text-sm text-zinc-500">
+            Core Lab에 오신 것을 환영합니다
           </p>
-        )}
+        </div>
 
-        {error && (
-          <p className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
-            {error}
-          </p>
-        )}
+        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+          {signupSuccess && (
+            <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+              회원가입이 완료되었습니다. 로그인해주세요.
+            </div>
+          )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label
-              htmlFor="username"
-              className="mb-1 block text-sm font-medium text-zinc-700"
+          {error && (
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <label
+                htmlFor="username"
+                className="text-sm font-medium text-zinc-900"
+              >
+                아이디
+              </label>
+              <input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                className="flex h-10 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                placeholder="아이디를 입력하세요"
+              />
+            </div>
+            <div className="space-y-2">
+              <label
+                htmlFor="password"
+                className="text-sm font-medium text-zinc-900"
+              >
+                비밀번호
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="flex h-10 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                placeholder="비밀번호를 입력하세요"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="inline-flex h-10 w-full items-center justify-center rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-zinc-50 transition-colors hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
             >
-              아이디
-            </label>
-            <input
-              id="username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              className="w-full rounded-lg border border-zinc-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              placeholder="아이디를 입력하세요"
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="password"
-              className="mb-1 block text-sm font-medium text-zinc-700"
-            >
-              비밀번호
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full rounded-lg border border-zinc-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              placeholder="비밀번호를 입력하세요"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full rounded-lg bg-blue-600 py-2 font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
-          >
-            {isLoading ? "로그인 중..." : "로그인"}
-          </button>
-        </form>
+              {isLoading ? "로그인 중..." : "로그인"}
+            </button>
+          </form>
 
-        <div className="mt-6">
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-zinc-200" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-2 text-zinc-500">또는</span>
+            </div>
+          </div>
+
           <button
             type="button"
             onClick={handleGoogleLogin}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-zinc-300 py-2 transition-colors hover:bg-zinc-50"
+            className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-900 shadow-sm transition-colors hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24">
               <path
@@ -123,9 +139,12 @@ function LoginForm() {
           </button>
         </div>
 
-        <p className="mt-6 text-center text-sm text-zinc-600">
+        <p className="text-center text-sm text-zinc-500">
           계정이 없으신가요?{" "}
-          <Link href="/signup" className="font-medium text-blue-600 hover:underline">
+          <Link
+            href="/signup"
+            className="font-medium text-zinc-900 underline underline-offset-4 hover:text-zinc-700"
+          >
             회원가입
           </Link>
         </p>
@@ -136,7 +155,13 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">로딩 중...</div>}>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-zinc-50/80">
+          <p className="text-sm text-zinc-500">로딩 중...</p>
+        </div>
+      }
+    >
       <LoginForm />
     </Suspense>
   );

@@ -15,7 +15,7 @@ export default function Header() {
   useEffect(() => {
     setMounted(true);
     setAuthenticated(isAuthenticated());
-  }, [pathname]); // pathname 변경 시(로그인/로그아웃 후) 재확인
+  }, [pathname]);
 
   const isAuthPage = pathname === "/login" || pathname === "/signup";
   const isOAuthPage = pathname.startsWith("/oauth2");
@@ -26,9 +26,12 @@ export default function Header() {
 
   if (!mounted) {
     return (
-      <header className="border-b border-zinc-200 bg-white">
+      <header className="sticky top-0 z-50 w-full border-b border-zinc-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
         <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
-          <Link href="/" className="font-semibold text-zinc-900">
+          <Link
+            href="/"
+            className="font-semibold text-zinc-900 hover:text-zinc-700"
+          >
             Core Lab
           </Link>
         </div>
@@ -37,30 +40,33 @@ export default function Header() {
   }
 
   return (
-    <header className="border-b border-zinc-200 bg-white">
+    <header className="sticky top-0 z-50 w-full border-b border-zinc-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
-        <Link href="/posts" className="font-semibold text-zinc-900">
+        <Link
+          href="/posts"
+          className="font-semibold text-zinc-900 hover:text-zinc-700"
+        >
           Core Lab
         </Link>
-        <nav className="flex items-center gap-4">
+        <nav className="flex items-center gap-1">
           {authenticated ? (
             <>
               <Link
                 href="/posts"
-                className="text-sm text-zinc-600 hover:text-zinc-900"
+                className="inline-flex h-9 items-center justify-center rounded-md px-3 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
               >
                 게시판
               </Link>
               <Link
                 href="/posts/new"
-                className="text-sm text-zinc-600 hover:text-zinc-900"
+                className="inline-flex h-9 items-center justify-center rounded-md px-3 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
               >
                 글쓰기
               </Link>
               <button
                 onClick={logout}
                 disabled={isLoading}
-                className="rounded-lg px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-100 disabled:opacity-50"
+                className="inline-flex h-9 items-center justify-center rounded-md px-3 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900 disabled:pointer-events-none disabled:opacity-50"
               >
                 로그아웃
               </button>
@@ -69,13 +75,13 @@ export default function Header() {
             <>
               <Link
                 href="/login"
-                className="rounded-lg px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-100"
+                className="inline-flex h-9 items-center justify-center rounded-md px-3 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
               >
                 로그인
               </Link>
               <Link
                 href="/signup"
-                className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700"
+                className="inline-flex h-9 items-center justify-center rounded-md bg-zinc-900 px-4 text-sm font-medium text-zinc-50 transition-colors hover:bg-zinc-800"
               >
                 회원가입
               </Link>
